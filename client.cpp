@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <sstream>
 #include <thread>
-/*#include "game.cpp"*/
+#include "protocol.cpp"
 
 using namespace std;
 
@@ -25,22 +25,19 @@ class Client
         int n;
         int message_server;
         int port;
-        char* ip_address;
+        char const* ip_address;
 
         /*char buffer[256];*/
         /*char message[256];*/
-        int buffer;
-        int message;
-        string name;
+        char message[256];
+        char buffer[256];
         int packet_size;
         int header_size;
-        /*x*/
-        char chip;
 
 
         Client();
         // ip, port, header_size, packet_size, 
-        Client(char*, int, int, int);
+        Client(char const*, int, int, int);
         string adding_header(string);
 
         bool login(char*);
@@ -53,73 +50,73 @@ class Client
 
 Client::Client(){}
 
-Client::Client(char* ip, int port, int header, int packet)
+Client::Client(char const *ip, int port, int header, int packet)
 {
+
+    Protocol test = Protocol();
+    test.envelop("simple-message", "test text lalito");
+    //test->transform_bits_to_decimal(test->transform_char_to_bits('a'));
+
     this->ip_address = ip;
     this->port = port;
     this->header_size = header;
     this->packet_size = packet;
-    //game = new Game(board);
-    SocketFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+    this->SocketFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     // error while we try create the token
-    if (-1 == SocketFD)
+    if (-1 == this->SocketFD)
     {
         perror("cannot create socket");
         exit(EXIT_FAILURE);
     }
 
-    memset(&stSockAddr, 0, sizeof(struct sockaddr_in));
+    memset(&this->stSockAddr, 0, sizeof(struct sockaddr_in));
 
-    stSockAddr.sin_family = AF_INET;
-    stSockAddr.sin_port = htons(this->port);
-    this->Res = inet_pton(AF_INET, ip_address, &stSockAddr.sin_addr);
+    this->stSockAddr.sin_family = AF_INET;
+    this->stSockAddr.sin_port = htons(this->port);
+    this->Res = inet_pton(AF_INET, ip_address, &this->stSockAddr.sin_addr);
 
-    if (0 > Res)
+    if (0 > this->Res)
     {
         perror("error: first parameter is not a valid address family");
-        close(SocketFD);
+        close(this->SocketFD);
         exit(EXIT_FAILURE);
     }
-    else if (0 == Res)
+    else if (0 == this->Res)
     {
         perror("char string (second parameter does not contain valid ipaddress");
-        close(SocketFD);
+        close(this->SocketFD);
         exit(EXIT_FAILURE);
     }
 
-    if (-1 == connect(SocketFD, (const struct sockaddr *)&stSockAddr, sizeof(struct sockaddr_in)))
+    if (-1 == connect(this->SocketFD, (const struct sockaddr *)&this->stSockAddr, sizeof(struct sockaddr_in)))
     {
         perror("connect failed");
-        close(SocketFD);
+        close(this->SocketFD);
         exit(EXIT_FAILURE);
     }
   
 }
 
+
 void Client::read_server()
 {
+
     for(;;)
     {
-        //game->draw_board();
-        printf("\n Your sign to play is : %c \n", this->chip);
-        printf("Introduce a position to start (ex: 22 <- to fill pos [2][2]): ");
-        scanf("%d" , &message);
+        printf("Enter a message to server: ");
+        scanf("%s" , this->message);
 
-        /*char * error_message = (char*)"";
-        if(!game->set_position(message, error_message, 'O'))
-            printf("ERROR:  %s \n", error_message);*/
-
-        n = write(SocketFD, &message, sizeof(message));
+        n = write(this->SocketFD, this->message, 255);
         if (n < 0) perror("ERROR writing to socket");
         
-        message_server = read(SocketFD, &buffer, sizeof(buffer));
-        if (message_server < 0) perror("ERROR reading from socket");
+        bzero(this->buffer, 255);
+        this->message_server = read(this->SocketFD, this->buffer, 255);
+        if (this->message_server < 0) perror("ERROR reading from socket");
 
-        /*char * error_messagee = (char*)"";
-        if(!game->set_position(buffer, error_messagee, 'X'))
-            printf("ERROR:  %s \n", error_messagee);*/
-
-        printf("Message of server: << %d >>\n", buffer);
+        printf("Message of server: << %s >>\n", buffer);
     }
+
+    shutdown(this->SocketFD, SHUT_RDWR);
+    close(this->SocketFD);
 }
