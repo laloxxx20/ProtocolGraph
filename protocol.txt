@@ -1,0 +1,12 @@
+1: simple_message = | type | header-1 | header-2 | text-data |
+
+    type     = |option-type-message| 
+               1 byte: 8 bits: 256 options
+
+    header-1 = |size-header-1|:6, max static size for header2.
+               1 byte: 8 bits: how many bytes header-2 can have like max.
+
+    header-2 = |size-text-data|, max-size in characters of text-data, ex.
+               |000030| -> means 30 characters in text-data, filled with 4
+                           zeros to the max static size setted in header-1.
+
