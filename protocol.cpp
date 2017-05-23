@@ -6,7 +6,8 @@
 
 using namespace std;
 
-typedef const char* (*func)(const char*);
+typedef char const* chars;
+typedef chars (*func)(chars);
 
 class Protocol{
 
@@ -14,15 +15,16 @@ class Protocol{
         char* message;
         int size_header_type_message;
         int type_message; // 8 bits in decimal, so max of 255
-        map<const char*, func> type_messages;
+        map<chars, func> type_messages_envelop; //<val_char*_of_func, func>
+        map<int, func> type_messages_unwrap; // <value_int_of_func, func>
 
         Protocol();
 
         // (type_message, data) 
-        char const* envelop(char const*, char const*);
+        chars envelop(chars, chars);
 
         // (data)
-        char const* unwrap(char const*);
+        chars unwrap(chars);
 
         // transform first character to bits
         vector<int> transform_char_to_bits(unsigned char);
@@ -33,8 +35,9 @@ class Protocol{
 };
 
 Protocol::Protocol(){
-    this->size_header_type_message = 8;
-    this->type_messages["simple-message"] = simple_message;
+    this->size_header_type_message = 8; // 8 bits in decimal, so max of 255
+    this->type_messages_envelop["simple-message"] = simple_message_env; // key for this envelop func is "simple-message" 
+    this->type_messages_unwrap[1] = simple_message_unwr; // key for this unwarp func is "1"
 }
 
 void Protocol::print_binary(vector<int> v){
@@ -47,7 +50,7 @@ vector<int> Protocol::transform_char_to_bits(unsigned char type){
     vector<int> binary;
     for(int i = 0; i < this->size_header_type_message; i++)
         binary.push_back((type >> i) & 1 );
-    this->print_binary(binary);
+    //this->print_binary(binary);
 
     return binary;
 }
@@ -65,15 +68,23 @@ int Protocol::transform_bits_to_decimal(vector<int> v){
 }
 
 
-char const* Protocol::unwrap(char const* data){
-    cout<<"unwrap"<<endl;
+chars Protocol::unwrap(chars data){
+    char type_in_char = data[0];
+    vector<int> type_in_vec = this->transform_char_to_bits(type_in_char);
+    int type_messa = this->transform_bits_to_decimal(type_in_vec);
+
+    map<int, func>::iterator it;
+    // searching a func in map of type of messages to unwrap with func found
+    it = this->type_messages_unwrap.find(type_messa);
+
+    return it->second(data);
 }
 
-char const* Protocol::envelop(char const* type_messa, char const* data){
+chars Protocol::envelop(chars type_messa, chars data){
 
-    map<const char*, func>::iterator it;
+    map<chars, func>::iterator it;
     // searching a func in map of type of messages to envelop with func found
-    it = this->type_messages.find(type_messa);
+    it = this->type_messages_envelop.find(type_messa);
 
     return it->second(data);
 }

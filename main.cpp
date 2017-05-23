@@ -22,20 +22,3 @@ int main(int argc, char const *argv[])
 
     return 0;
 }
-
-/*#include <stdio.h>
-void my_int_func(int x)
-{
-    printf( "%d\n", x );
-}
-
-
-int main()
-{
-    void (*foo)(int) = my_int_func;
-
-    foo( 2 );
-    (*foo)( 2 );
-
-    return 0;
-}*/

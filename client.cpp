@@ -53,9 +53,11 @@ Client::Client(){}
 Client::Client(char const *ip, int port, int header, int packet)
 {
 
-    Protocol test = Protocol();
-    test.envelop("simple-message", "test text lalito");
-    //test->transform_bits_to_decimal(test->transform_char_to_bits('a'));
+    Protocol* test = new Protocol();
+    char const* message = test->envelop("simple-message", "test text lalito");
+    cout<<"envelop message: "<<message<<endl;
+    char const* unwrapped_messa = test->unwrap(message);
+    cout<<"unwrapped message: "<<unwrapped_messa<<endl;
 
     this->ip_address = ip;
     this->port = port;
