@@ -28,7 +28,7 @@ class Server {
 
         int packet_size;
         int header_size;
-        // Protocol* protocol;
+        Protocol* protocol;
 
         Server();
         // port, header_size, packet_size,
@@ -39,7 +39,7 @@ class Server {
 Server::Server(){}
 
 Server::Server(int port, int header_size , int packet_size){
-    // this->protocol = new Protocol();
+    this->protocol = new Protocol();
 
     this->SocketFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     this->port = port;
@@ -96,21 +96,22 @@ void Server::connection(){
             bzero(this->buffer, 256);
             n = read(ConnectFD, this->buffer, 255);
             if (n < 0) perror("ERROR reading from socket");
+            
+            chars unwrapped_messa = this->protocol->unwrap(this->buffer);
+            printf("Message of client: << %s >>>\n", unwrapped_messa);
 
-            printf("Message of client: << %s >>>\n", this->buffer);
-            /*chars unwrapped_messa = this->protocol->unwrap(this->buffer);
-            printf("Message of client: << %s >>>\n", unwrapped_messa);*/
-
+            chars messa = "";
             if(strlen(buffer) > 0){
                 printf("Enter message to client: ");
                 scanf("%s" , this->message);
+                messa = this->protocol->envelop("simple-message", this->message);
             }
             else {
                 printf("Client desconnected !!! \n");
                 break;
             }
 
-            n = write(ConnectFD, this->message, 255);
+            n = write(ConnectFD, messa, 255);
             if (n < 0) perror("ERROR writing to socket");
         }
         /*} while(buffer != "chao");*/

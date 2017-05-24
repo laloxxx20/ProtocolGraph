@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <sstream>
 #include <thread>
-#include "protocol.h"
+// #include "protocol.h"
 
 using namespace std;
 
@@ -118,7 +118,8 @@ void Client::read_server()
         this->message_server = read(this->SocketFD, this->buffer, 255);
         if (this->message_server < 0) perror("ERROR reading from socket");
 
-        printf("Message of server: << %s >>\n", buffer);
+        chars unwrapped_messa = this->protocol->unwrap(this->buffer);
+        printf("Message of server: << %s >>\n", unwrapped_messa);
     }
 
     shutdown(this->SocketFD, SHUT_RDWR);

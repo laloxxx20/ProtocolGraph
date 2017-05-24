@@ -1,3 +1,4 @@
+#include "protocol.h"
 #include "client.h"
 #include "server.h"
 #include <iostream>
