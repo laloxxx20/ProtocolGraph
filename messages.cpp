@@ -1,3 +1,10 @@
+/*
+    PLEASE READ THE FILE "protocol.txt" WHERE IS DEFINED THE STRUCTURE OF EACH TYPE OF MESSAGE OF THIS FILE !!!!!!!
+
+    (S) --> begin section of comment
+    (E) --> end section of comment
+*/
+
 #include <sstream>
 #include <string.h>
 #include <iostream>
@@ -49,63 +56,56 @@ int chars_to_int(chars a){
 }
 
 chars sub_chars(chars c, int pos, int range){
-    cout<<"c: "<<c<<endl;
-    cout<<"pos: "<<pos<<endl;
-    cout<<"range: "<<range<<endl;
-    stringstream strs;
-    strs<<c;
-    string temp_str = strs.str();
-    chars sub_charss = temp_str.substr(pos, range).c_str();
-    cout<<"sub_charss: "<<temp_str.substr(pos, range).c_str()<<endl;
 
-    return sub_charss;
+    char* substr = new char[range + 1];
+    for(int i=pos; i<pos+range; i++)
+        substr[i-pos] = c[i];
+
+    return substr;
 }
 
-int sub_chars_int(chars c, int pos, int range){
-    stringstream strs;
-    strs<<c;
-    string temp_str = strs.str();
-    chars sub_charss = temp_str.substr(pos, range).c_str();
 
-    return chars_to_int(sub_charss);
-}
+// THIS BOTTOM SECTION ARE ALL TYPE OF MESSAGES FOR COMUNICATE WITH SERVER.
+// uSUALLY IS THE NAME OF FUNCTION TYPE MESSAGE WITH THEIR FUNCTIONALLITY(ENVELOP OR UNWRAPPING). Ex name_of_message_env() / name_of_message_unwr()
 
 chars simple_message_env(chars m){
     int type_message = 1; // this is the type of this message func
     int size_header_2 = 6; // characters
 
-    //(S) first part composed by header-2 and text-data
+    //(S) First part composed by header-2 and text-data
     int size_m = strlen(m);    
     int n_digits = number_digits(size_m);
     chars header2 = fill_zeros(size_m, size_header_2- n_digits);
     chars first_part = concat_chars(header2, m);
-    //(E) first part composed by header-2 and text-data
+    //(E) First part composed by header-2 and text-data
 
-    //(S) second part composed by header-1 and first part(header-2 | text-data)
+    //(S) Second part composed by header-1 and first part(header-2 | text-data)
     char char_size_header_2 = (char)size_header_2;
     chars chars_size_header_2 = char_to_chars(char_size_header_2);
     chars second_part = concat_chars(chars_size_header_2, first_part);
-    //(E) second part composed by header-1 and first part(header-2 | text-data)
+    //(E) Second part composed by header-1 and first part(header-2 | text-data)
 
-    //(S) total message composed by type and second_part(header-1 | header-2 | text-data)
+    //(S) Total message composed by type and second_part(header-1 | header-2 | text-data)
     char char_type_message = (char)type_message;
     chars chars_type_message = char_to_chars(char_type_message);
-    chars envelop_messa = concat_chars(chars_type_message, second_part);
-    //(E) total message composed by type and second_part(header-1 | header-2 | text-data)
+    chars enveloped_messa = concat_chars(chars_type_message, second_part);
+    //(E) Total message composed by type and second_part(header-1 | header-2 | text-data)
 
-    return envelop_messa;
+    return enveloped_messa;
 }
 
 chars simple_message_unwr(chars m){
     int type_message = 1; // this is the type of this message func
 
-    int size_header_2 = (int)m[1];
+    // (S) Gettins data of header-1 that is size of header-2, and after getting the data of header-2
+    int size_header_2 = (int)m[1]; // getting the data of header-1 that is size of header_2
+    chars header2 = sub_chars(m, 2, size_header_2);
+    // (E) Gettins data of header-1 that is size of header-2, and after getting the data of header-2
 
-    int value_header2 = sub_chars_int(m, 2, size_header_2);
-    cout<<"value_header2: "<<value_header2<<endl;
+    // (S) Getting the size of text-data, and after getting the substr of message
+    int value_header2 = chars_to_int(header2);;
+    chars unwrapped_messa = sub_chars(m, 2 + size_header_2 , value_header2);
+    // (E) Getting the size of text-data, and after getting the substr of message
 
-    chars unwrap_messa = sub_chars(m, 2 + size_header_2 , value_header2);
-    cout<<"text_data: "<<unwrap_messa<<endl;
-
-    return unwrap_messa;
+    return unwrapped_messa;
 }
