@@ -1,6 +1,5 @@
-
-#include "client.cpp"
-#include "server.cpp"
+#include "client.h"
+#include "server.h"
 #include <iostream>
 
 using namespace std;
@@ -8,13 +7,15 @@ using namespace std;
 int main(int argc, char const *argv[])
 {
     int port = 1100;
+    char const* IP_CLIENT = "192.168.0.17";
+
     if(strcmp(argv[1], "s") == 0)
     {
         Server* s = new Server(port, 4 , 1000);
         s->connection();        
     }
     if(strcmp(argv[1], "c") == 0){
-        Client* c = new Client("192.168.0.17", port, 4, 10);
+        Client* c = new Client(IP_CLIENT, port, 4, 10);
         c->read_server();
     }
     else
