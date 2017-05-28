@@ -8,16 +8,18 @@ using namespace std;
 int main(int argc, char const *argv[])
 {
     int port = 1100;
-    char const* IP_CLIENT = "192.168.0.17";
+    char const* IP_CLIENT = "127.0.0.1";
 
     if(strcmp(argv[1], "s") == 0)
     {
         Server* s = new Server(port, 4 , 1000);
-        s->connection();        
+        //s->connection();
+        s->establish_clients();        
     }
-    if(strcmp(argv[1], "c") == 0){
+    else if(strcmp(argv[1], "c") == 0){
         Client* c = new Client(IP_CLIENT, port, 4, 10);
-        c->read_server();
+        //c->read_server();
+        c->test_client();
     }
     else
         cout<<"Please insert a value to execute server(s) or client(c) "<<endl;

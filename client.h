@@ -48,6 +48,8 @@ class Client{
         void write_server();
         void get_list_online();
         void start_client();
+
+        void test_client();
 };
 
 
@@ -121,6 +123,23 @@ void Client::read_server()
         chars unwrapped_messa = this->protocol->unwrap(this->buffer);
         printf("Message of server: << %s >>\n", unwrapped_messa);
     }
+
+    shutdown(this->SocketFD, SHUT_RDWR);
+    close(this->SocketFD);
+}
+
+
+void Client::test_client()
+{
+    bzero(this->buffer, 255);
+    
+    this->message_server = read(this->SocketFD, this->buffer, 255);
+    if (this->message_server < 0) perror("ERROR reading from socket");
+    printf("Mensaje: [%s]\n",this->buffer);
+
+    chars messa = "Devolviendo";
+    n = write(this->SocketFD, messa, 255); //test
+    if (n < 0) perror("ERROR writing to socket");
 
     shutdown(this->SocketFD, SHUT_RDWR);
     close(this->SocketFD);

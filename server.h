@@ -19,7 +19,7 @@ typedef char const* chars;
 class Server {
 
     public:
-        struct sockaddr_in stSockAddr;
+        struct sockaddr_in stSockAddr, client_addr;
         int SocketFD;
         int port;
         char buffer[255];
@@ -30,15 +30,25 @@ class Server {
         int header_size;
         Protocol* protocol;
 
+        int num_clients;
+        int *socket_clients;
+
         Server();
         // port, header_size, packet_size,
         Server(int, int, int);
         void connection();
+
+        void establish_clients();
+
 };
 
 Server::Server(){}
 
 Server::Server(int port, int header_size , int packet_size){
+    
+    this->num_clients = 3;
+    this->socket_clients = new int[num_clients]; //for 3 clients
+
     this->protocol = new Protocol();
 
     this->SocketFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -118,4 +128,47 @@ void Server::connection(){
         shutdown(ConnectFD, SHUT_RDWR);
         close(ConnectFD);
     }
+}
+
+void Server::establish_clients()
+{
+    socklen_t len;
+    int i=0;
+    while(i<num_clients){
+        
+        len = sizeof(client_addr);
+        socket_clients[i] = accept(SocketFD, (struct sockaddr *)&client_addr, &len);
+   
+        if(0 > socket_clients[i])
+        {
+            perror("error accept failed");
+            close(SocketFD);
+            exit(EXIT_FAILURE);
+        }
+        else{
+            printf("Client %d ready\n",i);
+            i++;
+        }
+    }
+
+
+
+    chars messa = "hola a todos";
+
+    n = write(socket_clients[1], messa, 255); //test
+    if (n < 0) perror("ERROR writing to socket");
+
+    n = read(socket_clients[1], this->buffer, 255);
+    if (n < 0) perror("ERROR reading from socket");
+    printf("Mensaje: [%s]\n",this->buffer);
+    
+
+    printf("Clients established, ready to path\n");
+    for (int i = 0; i < num_clients; ++i)
+    {
+        shutdown(socket_clients[i], SHUT_RDWR);
+        close(socket_clients[i]);
+    }
+    
+    
 }
