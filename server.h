@@ -32,8 +32,9 @@ class Server {
 
         Server();
         // port, header_size, packet_size,
-        Server(int, int, int);
+        Server(int, int, int);        
         void connection();
+        void new_client_connection(int);
 };
 
 Server::Server(){}
@@ -75,6 +76,37 @@ Server::Server(int port, int header_size , int packet_size){
     printf("Waiting for a connection ... \n");
 }
 
+void Server::new_client_connection(int connect_id){
+    for(;;)
+    {
+    // do
+    // {
+        bzero(this->buffer, 256);
+        n = read(connect_id, this->buffer, 255);
+        if (n < 0) perror("ERROR reading from socket");
+        
+        chars unwrapped_messa = this->protocol->unwrap(this->buffer);
+        printf("Message of client: << %s >>>\n", unwrapped_messa);
+
+        chars messa = "";
+        if(strlen(buffer) > 0){
+            printf("Enter message to client: ");
+            scanf("%s" , this->message);
+            messa = this->protocol->envelop("simple-message", this->message);
+        }
+        else {
+            printf("Client desconnected !!! \n");
+            break;
+        }
+
+        n = write(connect_id, messa, 255);
+        if (n < 0) perror("ERROR writing to socket");
+    }
+    // } while(buffer != "chao");
+    shutdown(connect_id, SHUT_RDWR);
+    close(connect_id);
+}
+
 void Server::connection(){
 
     for(;;){
@@ -89,33 +121,8 @@ void Server::connection(){
         }
         printf("Client connected !!! \n");
 
-        for(;;)
-        {
-        /*do
-        {*/
-            bzero(this->buffer, 256);
-            n = read(ConnectFD, this->buffer, 255);
-            if (n < 0) perror("ERROR reading from socket");
-            
-            chars unwrapped_messa = this->protocol->unwrap(this->buffer);
-            printf("Message of client: << %s >>>\n", unwrapped_messa);
+        thread t(&Server::new_client_connection, this, ConnectFD);
+        t.detach();
 
-            chars messa = "";
-            if(strlen(buffer) > 0){
-                printf("Enter message to client: ");
-                scanf("%s" , this->message);
-                messa = this->protocol->envelop("simple-message", this->message);
-            }
-            else {
-                printf("Client desconnected !!! \n");
-                break;
-            }
-
-            n = write(ConnectFD, messa, 255);
-            if (n < 0) perror("ERROR writing to socket");
-        }
-        /*} while(buffer != "chao");*/
-        shutdown(ConnectFD, SHUT_RDWR);
-        close(ConnectFD);
     }
 }
