@@ -109,15 +109,16 @@ void Client::read_server()
 {
     for(;;)
     {
-        printf("Enter a message to server: ");
-        scanf("%s" , this->message);
-        chars messa = this->protocol->envelop("simple-message", this->message);
         /*printf("message: %s\n", messa);
         chars ALL_MSG_SIZE = this->protocol->all_message_size(messa);
         printf("ALL_MSG_SIZE: %s\n", ALL_MSG_SIZE);
 
         n = write(this->SocketFD, ALL_MSG_SIZE, chars_to_int(ALL_MSG_SIZE));
         if (n < 0) perror("ERROR writing to socket");*/
+
+        printf("Enter a message to server: ");
+        scanf("%s" , this->message);
+        chars messa = this->protocol->envelop("simple-message", this->message);
 
         n = write(this->SocketFD, messa, 255);
         if (n < 0) perror("ERROR writing to socket");

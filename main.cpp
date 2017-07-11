@@ -15,7 +15,7 @@ int main(int argc, char const *argv[])
     if(strcmp(argv[1], "s") == 0)
     {
         Server* s = new Server(port, 4 , 1000, path_bigramas, path_wordnet);
-        s->load_data();
+        /*s->load_data();*/
         s->connection();        
     }
 
