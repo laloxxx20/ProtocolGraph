@@ -12,6 +12,7 @@
 using namespace std;
 
 typedef char const* chars;
+const int DIGITS_TO_SIZE_IN_BYTES_ALL = 6; // this variable is for all type of message, because is the number of digits where the size of ALL message is 
 
 chars concat_chars(chars a, chars b){
     char * result = (char*)malloc(strlen(a) + strlen(b) + 1);
@@ -75,7 +76,7 @@ chars simple_message_env(chars m){
     //(S) First part composed by header-2 and text-data
     int size_m = strlen(m);    
     int n_digits = number_digits(size_m);
-    chars header2 = fill_zeros(size_m, size_header_2- n_digits);
+    chars header2 = fill_zeros(size_m, size_header_2 - n_digits);
     chars first_part = concat_chars(header2, m);
     //(E) First part composed by header-2 and text-data
 
@@ -91,16 +92,24 @@ chars simple_message_env(chars m){
     chars enveloped_messa = concat_chars(chars_type_message, second_part);
     //(E) Total message composed by type and second_part(header-1 | header-2 | text-data)
 
+   
+    /*int SIZE_ALL = strlen(enveloped_messa);
+    int n_digits_SIZE_ALL = number_digits(SIZE_ALL);
+    chars MAIN_HEADER = fill_zeros(SIZE_ALL, DIGITS_TO_SIZE_IN_BYTES_ALL - n_digits_SIZE_ALL);
+    chars TOTAL_enveloped_messa = concat_chars(MAIN_HEADER, enveloped_messa);
+    printf("SIZE_ALL: %d\n", SIZE_ALL);
+    printf("TOTAL_enveloped_messa: %s\n", TOTAL_enveloped_messa);*/
+    
     return enveloped_messa;
 }
 
 chars simple_message_unwr(chars m){
     int type_message = 1; // this is the type of this message func
 
-    // (S) Gettins data of header-1 that is size of header-2, and after getting the data of header-2
+    // (S) Getting data of header-1 that is size of header-2, and after getting the data of header-2
     int size_header_2 = (int)m[1]; // getting the data of header-1 that is size of header_2
     chars header2 = sub_chars(m, 2, size_header_2);
-    // (E) Gettins data of header-1 that is size of header-2, and after getting the data of header-2
+    // (E) Getting data of header-1 that is size of header-2, and after getting the data of header-2
 
     // (S) Getting the size of text-data, and after getting the substr of message
     int value_header2 = chars_to_int(header2);;

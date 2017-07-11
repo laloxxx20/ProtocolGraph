@@ -20,6 +20,9 @@ class Protocol{
 
         Protocol();
 
+        // (total_message)
+        chars all_message_size(chars);
+
         // (type_message, data) 
         chars envelop(chars, chars);
 
@@ -68,6 +71,25 @@ int Protocol::transform_bits_to_decimal(vector<int> v){
 }
 
 
+chars Protocol::all_message_size(chars total_messa){
+    /*int SIZE_ALL = strlen(total_messa) + DIGITS_TO_SIZE_IN_BYTES_ALL;*/
+    int SIZE_ALL = strlen(total_messa);
+    int n_digits_SIZE_ALL = number_digits(SIZE_ALL);
+    chars MAIN_HEADER = fill_zeros(SIZE_ALL, DIGITS_TO_SIZE_IN_BYTES_ALL - n_digits_SIZE_ALL);
+
+    return MAIN_HEADER;
+}
+
+
+chars Protocol::envelop(chars type_messa, chars data){
+    map<chars, func>::iterator it;
+    // searching a func in map of type of messages to envelop with func found
+    it = this->type_messages_envelop.find(type_messa);
+
+    return it->second(data);
+}
+
+
 chars Protocol::unwrap(chars data){
     char type_in_char = data[0];
     vector<int> type_in_vec = this->transform_char_to_bits(type_in_char);
@@ -80,11 +102,3 @@ chars Protocol::unwrap(chars data){
     return it->second(data);
 }
 
-chars Protocol::envelop(chars type_messa, chars data){
-
-    map<chars, func>::iterator it;
-    // searching a func in map of type of messages to envelop with func found
-    it = this->type_messages_envelop.find(type_messa);
-
-    return it->second(data);
-}
